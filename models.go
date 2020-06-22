@@ -280,6 +280,14 @@ type Role struct {
 	Attributes         map[string][]string `json:"attributes,omitempty"`
 }
 
+// GetRolesParams represents the optional parameters for getting roles
+type GetRolesParams struct {
+	First               *int    `json:"first,string,omitempty"`
+	Max                 *int    `json:"max,string,omitempty"`
+	Search              *string `json:"search,omitempty"`
+	BriefRepresentation *bool   `json:"briefRepresentation,string,omitempty"`
+}
+
 // ClientMappingsRepresentation is a client role mappings
 type ClientMappingsRepresentation struct {
 	ID       *string `json:"id,omitempty"`

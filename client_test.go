@@ -1395,7 +1395,9 @@ func TestGocloak_GetClientRoles(t *testing.T) {
 	_, err := client.GetClientRoles(
 		token.AccessToken,
 		cfg.GoCloak.Realm,
-		*(testClient.ID))
+		*(testClient.ID),
+		GetRolesParams{},
+	)
 	require.NoError(t, err, "GetClientRoles failed")
 }
 
@@ -1619,7 +1621,9 @@ func TestGocloak_GetRealmRoles(t *testing.T) {
 
 	roles, err := client.GetRealmRoles(
 		token.AccessToken,
-		cfg.GoCloak.Realm)
+		cfg.GoCloak.Realm,
+		GetRolesParams{},
+	)
 	require.NoError(t, err, "GetRealmRoles failed")
 	t.Logf("Roles: %+v", roles)
 }
@@ -3202,7 +3206,11 @@ func TestGocloak_RolePolicy(t *testing.T) {
 	client := NewClientWithDebug(t)
 	token := GetAdminToken(t, client)
 
-	roles, err := client.GetRealmRoles(token.AccessToken, cfg.GoCloak.Realm)
+	roles, err := client.GetRealmRoles(
+		token.AccessToken,
+		cfg.GoCloak.Realm,
+		GetRolesParams{},
+	)
 	require.NoError(t, err, "GetRealmRoles failed")
 	require.GreaterOrEqual(t, len(roles), 1, "GetRealmRoles failed")
 

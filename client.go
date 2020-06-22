@@ -1056,12 +1056,18 @@ func (client *gocloak) GetGroupMembers(token string, realm string, groupID strin
 }
 
 // GetClientRoles get all roles for the given client in realm
-func (client *gocloak) GetClientRoles(token string, realm string, clientID string) ([]*Role, error) {
+func (client *gocloak) GetClientRoles(token string, realm string, clientID string, params GetRolesParams) ([]*Role, error) {
 	const errMessage = "could not get client roles"
 
 	var result []*Role
+	queryParams, err := GetQueryParams(params)
+	if err != nil {
+		return nil, errors.Wrap(err, errMessage)
+	}
+
 	resp, err := client.getRequestWithBearerAuth(token).
 		SetResult(&result).
+		SetQueryParams(queryParams).
 		Get(client.getAdminRealmURL(realm, "clients", clientID, "roles"))
 
 	if err := checkForError(resp, err, errMessage); err != nil {
@@ -1253,12 +1259,18 @@ func (client *gocloak) GetRealmRole(token string, realm string, roleName string)
 }
 
 // GetRealmRoles get all roles of the given realm.
-func (client *gocloak) GetRealmRoles(token string, realm string) ([]*Role, error) {
+func (client *gocloak) GetRealmRoles(token string, realm string, params GetRolesParams) ([]*Role, error) {
 	const errMessage = "could not get realm roles"
 
 	var result []*Role
+	queryParams, err := GetQueryParams(params)
+	if err != nil {
+		return nil, errors.Wrap(err, errMessage)
+	}
+
 	resp, err := client.getRequestWithBearerAuth(token).
 		SetResult(&result).
+		SetQueryParams(queryParams).
 		Get(client.getAdminRealmURL(realm, "roles"))
 
 	if err := checkForError(resp, err, errMessage); err != nil {

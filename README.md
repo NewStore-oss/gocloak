@@ -180,7 +180,7 @@ type GoCloak interface {
 
 	CreateRealmRole(token string, realm string, role Role) error
 	GetRealmRole(token string, realm string, roleName string) (*Role, error)
-	GetRealmRoles(accessToken string, realm string) ([]*Role, error)
+	GetRealmRoles(accessToken string, realm string, params GetRolesParams) ([]*Role, error)
 	GetRealmRolesByUserID(accessToken string, realm string, userID string) ([]*Role, error)
 	GetRealmRolesByGroupID(accessToken string, realm string, groupID string) ([]*Role, error)
 	UpdateRealmRole(token string, realm string, roleName string, role Role) error
@@ -198,6 +198,7 @@ type GoCloak interface {
 	AddClientRoleToGroup(token string, realm string, clientID string, groupID string, roles []Role) error
 	DeleteClientRoleFromGroup(token string, realm string, clientID string, groupID string, roles []Role) error
 	GetCompositeClientRolesByRoleID(token string, realm string, clientID string, roleID string) ([]*Role, error)
+	GetClientRoles(token string, realm string, clientID string, params GetRolesParams) ([]*Role, error)
 	GetClientRolesByUserID(token string, realm string, clientID string, userID string) ([]*Role, error)
 	GetClientRolesByGroupID(token string, realm string, clientID string, groupID string) ([]*Role, error)
 	GetCompositeClientRolesByUserID(token string, realm string, clientID string, userID string) ([]*Role, error)
