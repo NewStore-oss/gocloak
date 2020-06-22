@@ -148,7 +148,7 @@ type GoCloak interface {
 	// GetRealmRole returns a role from a realm by role's name
 	GetRealmRole(token string, realm string, roleName string) (*Role, error)
 	// GetRealmRoles get all roles of the given realm. It's an alias for the GetRoles function
-	GetRealmRoles(accessToken string, realm string) ([]*Role, error)
+	GetRealmRoles(accessToken string, realm string, params GetRolesParams) ([]*Role, error)
 	// GetRealmRolesByUserID returns all roles assigned to the given user
 	GetRealmRolesByUserID(accessToken string, realm string, userID string) ([]*Role, error)
 	// GetRealmRolesByGroupID returns all roles assigned to the given group
@@ -185,7 +185,7 @@ type GoCloak interface {
 	// DeleteClientRoleFromGroup removes a client role from from the group
 	DeleteClientRoleFromGroup(token string, realm string, clientID string, groupID string, roles []Role) error
 	// GetClientRoles gets roles for the given client
-	GetClientRoles(accessToken string, realm string, clientID string) ([]*Role, error)
+	GetClientRoles(accessToken string, realm string, clientID string, params GetRolesParams) ([]*Role, error)
 	// GetRealmRolesByUserID returns all client roles assigned to the given user
 	GetClientRolesByUserID(token string, realm string, clientID string, userID string) ([]*Role, error)
 	// GetClientRolesByGroupID returns all client roles assigned to the given group
