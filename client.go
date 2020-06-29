@@ -12,7 +12,7 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
 
-	"github.com/Nerzal/gocloak/v5/pkg/jwx"
+	"github.com/newstore-oss/gocloak/pkg/jwx"
 )
 
 type gocloak struct {
@@ -1374,6 +1374,20 @@ func (client *gocloak) DeleteRealmRoleFromGroup(token string, realm string, grou
 		Delete(client.getAdminRealmURL(realm, "groups", groupID, "role-mappings", "realm"))
 
 	return checkForError(resp, err, errMessage)
+}
+
+func (client *gocloak) GetRealmRoleComposites(token string, realm string, roleName string) ([]*Role, error) {
+	const errMessage = "could not add realm role composite"
+
+	var result []*Role
+	resp, err := client.getRequestWithBearerAuth(token).
+		SetResult(&result).
+		Get(client.getAdminRealmURL(realm, "roles", roleName, "composites"))
+
+	if err = checkForError(resp, err, errMessage); err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 func (client *gocloak) AddRealmRoleComposite(token string, realm string, roleName string, roles []Role) error {

@@ -165,6 +165,9 @@ type GoCloak interface {
 	AddRealmRoleToGroup(token string, realm string, groupID string, roles []Role) error
 	// DeleteRealmRoleFromGroup deletes realm-level role mappings
 	DeleteRealmRoleFromGroup(token string, realm string, groupID string, roles []Role) error
+
+	// GetRealmRoleComposites returns a list of composite roles associated with the given role name
+	GetRealmRoleComposites(token string, realm string, roleName string) ([]*Role, error)
 	// AddRealmRoleComposite adds roles as composite
 	AddRealmRoleComposite(token string, realm string, roleName string, roles []Role) error
 	// AddRealmRoleComposite adds roles as composite
