@@ -553,6 +553,21 @@ func (client *gocloak) UpdateRole(token, realm, clientID string, role Role) erro
 }
 
 
+func (client *gocloak) GetRoleByID(token, realm, roleID string) (*Role, error) {
+	const errMessage = "could not get role"
+
+	var result Role
+	resp, err := client.getRequestWithBearerAuth(token).
+		SetResult(&result).
+		Get(client.getAdminRealmURL(realm, "roles-by-id", roleID))
+
+	if err := checkForError(resp, err, errMessage); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
 func (client *gocloak) UpdateRoleByID(token, realm, roleID string, role Role) error {
 	const errMessage = "could not update role"
 

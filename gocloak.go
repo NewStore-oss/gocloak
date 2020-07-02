@@ -62,6 +62,9 @@ type GoCloak interface {
 	// UpdateRole updates the given client role by name
 	UpdateRole(accessToken string, realm string, clientID string, role Role) error
 
+	// Roles by id - https://www.keycloak.org/docs-api/10.0/rest-api/index.html#_roles_by_id_resource
+	// GetRole retrieves the given role by ID
+	GetRoleByID(token, realm, roleID string) (*Role, error)
 	// UpdateRole updates the given role by ID
 	UpdateRoleByID(token, realm, roleID string, role Role) error
 
