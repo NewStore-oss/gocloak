@@ -552,6 +552,17 @@ func (client *gocloak) UpdateRole(token, realm, clientID string, role Role) erro
 	return checkForError(resp, err, errMessage)
 }
 
+
+func (client *gocloak) UpdateRoleByID(token, realm, roleID string, role Role) error {
+	const errMessage = "could not update role"
+
+	resp, err := client.getRequestWithBearerAuth(token).
+		SetBody(role).
+		Put(client.getAdminRealmURL(realm, "roles-by-id", roleID))
+
+	return checkForError(resp, err, errMessage)
+}
+
 func (client *gocloak) UpdateClientScope(token string, realm string, scope ClientScope) error {
 	const errMessage = "could not update client scope"
 

@@ -59,8 +59,12 @@ type GoCloak interface {
 
 	// UpdateGroup updates the given group
 	UpdateGroup(accessToken string, realm string, updatedGroup Group) error
-	// UpdateRole updates the given role
+	// UpdateRole updates the given client role by name
 	UpdateRole(accessToken string, realm string, clientID string, role Role) error
+
+	// UpdateRole updates the given role by ID
+	UpdateRoleByID(token, realm, roleID string, role Role) error
+
 	// UpdateClient updates the given client
 	UpdateClient(accessToken string, realm string, updatedClient Client) error
 	// UpdateClientScope updates the given clientScope
