@@ -790,14 +790,23 @@ type IdentityProviderRepresentation struct {
 	Alias                     *string           `json:"alias,omitempty"`
 	Config                    map[string]string `json:"config,omitempty"`
 	DisplayName               *string           `json:"displayName,omitempty"`
-	Enabled                   *bool             `json:"enabled,omitempty"`
+	Enabled                   *bool             `json:"enabled"`
 	FirstBrokerLoginFlowAlias *string           `json:"firstBrokerLoginFlowAlias,omitempty"`
 	InternalID                *string           `json:"internalId,omitempty"`
-	LinkOnly                  *bool             `json:"linkOnly,omitempty"`
+	LinkOnly                  *bool             `json:"linkOnly"`
 	PostBrokerLoginFlowAlias  *string           `json:"postBrokerLoginFlowAlias,omitempty"`
 	ProviderID                *string           `json:"providerId,omitempty"`
-	StoreToken                *bool             `json:"storeToken,omitempty"`
-	TrustEmail                *bool             `json:"trustEmail,omitempty"`
+	StoreToken                *bool             `json:"storeToken"`
+	TrustEmail                *bool             `json:"trustEmail"`
+}
+
+// IdentityProviderMapperRepresentation represents the mapper of an identity provider
+type IdentityProviderMapperRepresentation struct {
+	ID                    *string           `json:"id,omitempty"`
+	Name                  *string           `json:"name,omitempty"`
+	IdentityProviderAlias *string           `json:"identityProviderAlias,omitempty"`
+	MapperType            *string           `json:"identityProviderMapper,omitempty"`
+	Config                map[string]string `json:"config,omitempty"`
 }
 
 // GetResourceParams represents the optional parameters for getting resources
