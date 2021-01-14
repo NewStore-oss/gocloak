@@ -1360,12 +1360,18 @@ func (client *gocloak) GetGroupMembers(ctx context.Context, token, realm, groupI
 }
 
 // GetClientRoles get all roles for the given client in realm
-func (client *gocloak) GetClientRoles(ctx context.Context, token, realm, clientID string) ([]*Role, error) {
+func (client *gocloak) GetClientRoles(ctx context.Context, token, realm, clientID string,  params GetRolesParams) ([]*Role, error) {
 	const errMessage = "could not get client roles"
 
 	var result []*Role
+	queryParams, err := GetQueryParams(params)
+	if err != nil {
+		return nil, errors.Wrap(err, errMessage)
+	}
+	
 	resp, err := client.getRequestWithBearerAuth(ctx, token).
 		SetResult(&result).
+		SetQueryParams(queryParams).
 		Get(client.getAdminRealmURL(realm, "clients", clientID, "roles"))
 
 	if err := checkForError(resp, err, errMessage); err != nil {
@@ -1586,13 +1592,35 @@ func (client *gocloak) GetRealmRole(ctx context.Context, token, realm, roleName 
 	return &result, nil
 }
 
+// GetRealmRoleByID returns a role from a realm by role's ID
+func (client *gocloak) GetRealmRoleByID(ctx context.Context, token, realm, roleID string) (*Role, error) {
+	const errMessage = "could not get realm role"
+
+	var result Role
+	resp, err := client.getRequestWithBearerAuth(ctx, token).
+		SetResult(&result).
+		Get(client.getAdminRealmURL(realm, "roles-by-id", roleID))
+
+	if err := checkForError(resp, err, errMessage); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
 // GetRealmRoles get all roles of the given realm.
-func (client *gocloak) GetRealmRoles(ctx context.Context, token, realm string) ([]*Role, error) {
+func (client *gocloak) GetRealmRoles(ctx context.Context, token, realm string, params GetRolesParams) ([]*Role, error) {
 	const errMessage = "could not get realm roles"
 
 	var result []*Role
+	queryParams, err := GetQueryParams(params)
+	if err != nil {
+		return nil, errors.Wrap(err, errMessage)
+	}
+	
 	resp, err := client.getRequestWithBearerAuth(ctx, token).
 		SetResult(&result).
+		SetQueryParams(queryParams).
 		Get(client.getAdminRealmURL(realm, "roles"))
 
 	if err := checkForError(resp, err, errMessage); err != nil {
@@ -1641,6 +1669,17 @@ func (client *gocloak) UpdateRealmRole(ctx context.Context, token, realm, roleNa
 	resp, err := client.getRequestWithBearerAuth(ctx, token).
 		SetBody(role).
 		Put(client.getAdminRealmURL(realm, "roles", roleName))
+
+	return checkForError(resp, err, errMessage)
+}
+
+// UpdateRealmRoleByID updates a role in a realm by role's ID
+func (client *gocloak) UpdateRealmRoleByID(ctx context.Context, token, realm, roleID string, role Role) error {
+	const errMessage = "could not update realm role"
+
+	resp, err := client.getRequestWithBearerAuth(ctx, token).
+		SetBody(role).
+		Put(client.getAdminRealmURL(realm, "roles-by-id", roleID))
 
 	return checkForError(resp, err, errMessage)
 }
@@ -1717,6 +1756,22 @@ func (client *gocloak) DeleteRealmRoleComposite(ctx context.Context, token, real
 		Delete(client.getAdminRealmURL(realm, "roles", roleName, "composites"))
 
 	return checkForError(resp, err, errMessage)
+}
+
+// GetCompositeRealmRoles returns all realm composite roles associated with the given realm role
+func (client *gocloak) GetCompositeRealmRoles(ctx context.Context, token, realm, roleName string) ([]*Role, error) {
+	const errMessage = "could not get composite realm roles by role"
+
+	var result []*Role
+	resp, err := client.getRequestWithBearerAuth(ctx, token).
+		SetResult(&result).
+		Get(client.getAdminRealmURL(realm, "roles", roleName, "composites"))
+
+	if err = checkForError(resp, err, errMessage); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // GetCompositeRealmRolesByRoleID returns all realm composite roles associated with the given client role
@@ -2299,6 +2354,84 @@ func (client *gocloak) DeleteIdentityProvider(ctx context.Context, token, realm,
 
 	resp, err := client.getRequestWithBearerAuth(ctx, token).
 		Delete(client.getAdminRealmURL(realm, "identity-provider", "instances", alias))
+
+	return checkForError(resp, err, errMessage)
+}
+
+// CreateIdentityProviderMapper creates a claim mapper for all users of the given identity provider
+func (client *gocloak) CreateIdentityProviderMapper(ctx context.Context, token string, realm string, identityProviderAlias string, providerMapperRep IdentityProviderMapperRepresentation) (string, error) {
+	const errMessage = "could not create identity provider mapper"
+
+	resp, err := client.getRequestWithBearerAuth(ctx, token).
+		SetBody(providerMapperRep).
+		Post(client.getAdminRealmURL(realm, "identity-provider", "instances", identityProviderAlias, "mappers"))
+		
+	if err := checkForError(resp, err, errMessage); err != nil {
+		return "", err
+	}
+
+	return getID(resp), nil
+}
+
+// GetIdentityProviderMappers gets the list of mappers for the given identity provider alias in a realm
+func (client *gocloak) GetIdentityProviderMappers(ctx context.Context, token string, realm string, identityProviderAlias string) ([]*IdentityProviderMapperRepresentation, error) {
+	const errMessage = "could not get identity provider mappers"
+
+	result := []*IdentityProviderMapperRepresentation{}
+	resp, err := client.getRequestWithBearerAuth(ctx, token).
+		SetResult(&result).
+		Get(client.getAdminRealmURL(realm, "identity-provider", "instances", identityProviderAlias, "mappers"))
+
+	if err := checkForError(resp, err, errMessage); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+// GetIdentityProviderMapper gets the mapper by id for the given identity provider alias in a realm
+func (client *gocloak) GetIdentityProviderMapper(ctx context.Context, token string, realm string, identityProviderAlias string, mapperID string) (*IdentityProviderMapperRepresentation, error) {
+	const errMessage = "could not get identity provider mapper"
+
+	result := IdentityProviderMapperRepresentation{}
+	resp, err := client.getRequestWithBearerAuth(ctx, token).
+		SetResult(&result).
+		Get(client.getAdminRealmURL(realm, "identity-provider", "instances", identityProviderAlias, "mappers", mapperID))
+
+	if err := checkForError(resp, err, errMessage); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+// UpdateIdentityProviderMapper updates an existing mapper from the given identity provider alias in a realm
+func (client *gocloak) UpdateIdentityProviderMapper(ctx context.Context, token string, realm string, identityProviderAlias string, providerMapperRep IdentityProviderMapperRepresentation) (*IdentityProviderMapperRepresentation, error) {
+	const errMessage = "could not update identity provider mapper"
+
+	if NilOrEmpty(providerMapperRep.ID) {
+		return nil, errors.New("IdentityProviderMapperRepresentation.ID is nil or empty")
+	}
+
+	result := IdentityProviderMapperRepresentation{}
+	resp, err := client.getRequestWithBearerAuth(ctx, token).
+		SetResult(&result).
+		SetBody(providerMapperRep).
+		Put(client.getAdminRealmURL(realm, "identity-provider", "instances", identityProviderAlias, "mappers", (*providerMapperRep.ID)))
+
+	if err := checkForError(resp, err, errMessage); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+// DeleteIdentityProviderMapper deletes an existing mapper from the given identity provider alias in a realm
+func (client *gocloak) DeleteIdentityProviderMapper(ctx context.Context, token string, realm string, identityProviderAlias string, mapperID string) error {
+	const errMessage = "could not delete identity provider mapper"
+
+	resp, err := client.getRequestWithBearerAuth(ctx, token).
+		Delete(client.getAdminRealmURL(realm, "identity-provider", "instances", identityProviderAlias, "mappers", mapperID))
 
 	return checkForError(resp, err, errMessage)
 }

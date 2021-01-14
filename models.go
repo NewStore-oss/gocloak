@@ -340,6 +340,14 @@ type Role struct {
 	Attributes         *map[string][]string      `json:"attributes,omitempty"`
 }
 
+// GetRolesParams represents the optional parameters for getting roles
+type GetRolesParams struct {
+	First               *int    `json:"first,string,omitempty"`
+	Max                 *int    `json:"max,string,omitempty"`
+	Search              *string `json:"search,omitempty"`
+	BriefRepresentation *bool   `json:"briefRepresentation,string,omitempty"`
+}
+
 // ClientMappingsRepresentation is a client role mappings
 type ClientMappingsRepresentation struct {
 	ID       *string `json:"id,omitempty"`
@@ -895,6 +903,15 @@ type IdentityProviderRepresentation struct {
 	ProviderID                *string            `json:"providerId,omitempty"`
 	StoreToken                *bool              `json:"storeToken,omitempty"`
 	TrustEmail                *bool              `json:"trustEmail,omitempty"`
+}
+
+// IdentityProviderMapperRepresentation represents the mapper of an identity provider
+type IdentityProviderMapperRepresentation struct {
+	ID                    *string           `json:"id,omitempty"`
+	Name                  *string           `json:"name,omitempty"`
+	IdentityProviderAlias *string           `json:"identityProviderAlias,omitempty"`
+	MapperType            *string           `json:"identityProviderMapper,omitempty"`
+	Config                map[string]string `json:"config,omitempty"`
 }
 
 // GetResourceParams represents the optional parameters for getting resources

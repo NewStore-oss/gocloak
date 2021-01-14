@@ -203,7 +203,7 @@ type GoCloak interface {
 	GetGroupMembers(ctx context.Context, accessToken, realm, groupID string, params GetGroupsParams) ([]*User, error)
 	GetRoleMappingByGroupID(ctx context.Context, accessToken, realm, groupID string) (*MappingsRepresentation, error)
 	GetRoleMappingByUserID(ctx context.Context, accessToken, realm, userID string) (*MappingsRepresentation, error)
-	GetClientRoles(ctx context.Context, accessToken, realm, clientID string) ([]*Role, error)
+	GetClientRoles(ctx context.Context, accessToken, realm, clientID string, params GetRolesParams) ([]*Role, error)
 	GetClientRole(ctx context.Context, token, realm, clientID, roleName string) (*Role, error)
 	GetClientRoleByID(ctx context.Context, accessToken, realm, roleID string) (*Role, error)
 	GetClients(ctx context.Context, accessToken, realm string, params GetClientsParams) ([]*Client, error)
@@ -219,10 +219,11 @@ type GoCloak interface {
 
 	CreateRealmRole(ctx context.Context, token, realm string, role Role) (string, error)
 	GetRealmRole(ctx context.Context, token, realm, roleName string) (*Role, error)
-	GetRealmRoles(ctx context.Context, accessToken, realm string) ([]*Role, error)
+	GetRealmRoles(ctx context.Context, accessToken, realm string, params GetRolesParams) ([]*Role, error)	GetRealmRoleByID(ctx context.Context, token, realm, roleID string) (*Role, error)
 	GetRealmRolesByUserID(ctx context.Context, accessToken, realm, userID string) ([]*Role, error)
 	GetRealmRolesByGroupID(ctx context.Context, accessToken, realm, groupID string) ([]*Role, error)
 	UpdateRealmRole(ctx context.Context, token, realm, roleName string, role Role) error
+	UpdateRealmRoleByID(ctx context.Context, token, realm, roleID string, role Role) error
 	DeleteRealmRole(ctx context.Context, token, realm, roleName string) error
 	AddRealmRoleToUser(ctx context.Context, token, realm, userID string, roles []Role) error
 	DeleteRealmRoleFromUser(ctx context.Context, token, realm, userID string, roles []Role) error
@@ -230,6 +231,7 @@ type GoCloak interface {
 	DeleteRealmRoleFromGroup(ctx context.Context, token, realm, groupID string, roles []Role) error
 	AddRealmRoleComposite(ctx context.Context, token, realm, roleName string, roles []Role) error
 	DeleteRealmRoleComposite(ctx context.Context, token, realm, roleName string, roles []Role) error
+	GetCompositeRealmRoles(ctx context.Context, token, realm, roleName string) ([]*Role, error)
 	GetCompositeRealmRolesByRoleID(ctx context.Context, token, realm, roleID string) ([]*Role, error)
 	GetCompositeRealmRolesByUserID(ctx context.Context, token, realm, userID string) ([]*Role, error)
 	GetCompositeRealmRolesByGroupID(ctx context.Context, token, realm, groupID string) ([]*Role, error)
@@ -329,6 +331,12 @@ type GoCloak interface {
 	GetIdentityProviders(ctx context.Context, token, realm string) ([]*IdentityProviderRepresentation, error)
 	UpdateIdentityProvider(ctx context.Context, token, realm, alias string, providerRep IdentityProviderRepresentation) error
 	DeleteIdentityProvider(ctx context.Context, token, realm, alias string) error
+
+	CreateIdentityProviderMapper(ctx context.Context, token string, realm string, identityProviderAlias string, providerMapperRep IdentityProviderMapperRepresentation) (string, error)
+	GetIdentityProviderMappers(ctx context.Context, token string, realm string, alias string) ([]*IdentityProviderMapperRepresentation, error)
+	GetIdentityProviderMapper(ctx context.Context, token string, realm string, alias string, mapperID string) (*IdentityProviderMapperRepresentation, error)
+	UpdateIdentityProviderMapper(ctx context.Context, token string, realm string, mapperID string, providerMapperRep IdentityProviderMapperRepresentation) (*IdentityProviderMapperRepresentation, error)
+	DeleteIdentityProviderMapper(ctx context.Context, token string, realm string, alias string, mapperID string) error
 
 	CreateUserFederatedIdentity(ctx context.Context, token, realm, userID, providerID string, federatedIdentityRep FederatedIdentityRepresentation) error
 	GetUserFederatedIdentities(ctx context.Context, token, realm, userID string) ([]*FederatedIdentityRepresentation, error)
