@@ -93,7 +93,7 @@ go get github.com/Nerzal/gocloak/v8
  if err != nil {
   panic("Something wrong with the credentials or url")
  }
- 
+
  user := gocloak.User{
   FirstName: gocloak.StringP(""Bob"),
   LastName:  gocloak.StringP(""Uncle"),
@@ -170,7 +170,7 @@ type GoCloak interface {
  GetRequestingPartyToken(ctx context.Context, token, realm string, options RequestingPartyTokenOptions) (*JWT, error)
  GetRequestingPartyPermissions(ctx context.Context, token, realm string, options RequestingPartyTokenOptions) (*[]RequestingPartyPermission, error)
  GetRequestingPartyPermissionDecision(ctx context.Context, token, realm string, options RequestingPartyTokenOptions) (*RequestingPartyPermissionDecision, error)
- 
+
  Login(ctx context.Context, clientID, clientSecret, realm, username, password string) (*JWT, error)
  LoginOtp(ctx context.Context, clientID, clientSecret, realm, username, password, totp string) (*JWT, error)
  Logout(ctx context.Context, clientID, clientSecret, realm, refreshToken string) error
@@ -270,10 +270,12 @@ type GoCloak interface {
 
  CreateRealmRole(ctx context.Context, token, realm string, role Role) (string, error)
  GetRealmRole(ctx context.Context, token, realm, roleName string) (*Role, error)
- GetRealmRoles(ctx context.Context, accessToken, realm string) ([]*Role, error)
+ GetRealmRoleByID(ctx context.Context, token, realm, roleID string) (*Role, error)
+ GetRealmRoles(ctx context.Context, accessToken, realm string, params GetRolesParams) ([]*Role, error)
  GetRealmRolesByUserID(ctx context.Context, accessToken, realm, userID string) ([]*Role, error)
  GetRealmRolesByGroupID(ctx context.Context, accessToken, realm, groupID string) ([]*Role, error)
  UpdateRealmRole(ctx context.Context, token, realm, roleName string, role Role) error
+ UpdateRealmRoleByID(ctx context.Context, token, realm, roleID string, role Role) error
  DeleteRealmRole(ctx context.Context, token, realm, roleName string) error
  AddRealmRoleToUser(ctx context.Context, token, realm, userID string, roles []Role) error
  DeleteRealmRoleFromUser(ctx context.Context, token, realm, userID string, roles []Role) error
@@ -281,6 +283,7 @@ type GoCloak interface {
  DeleteRealmRoleFromGroup(ctx context.Context, token, realm, groupID string, roles []Role) error
  AddRealmRoleComposite(ctx context.Context, token, realm, roleName string, roles []Role) error
  DeleteRealmRoleComposite(ctx context.Context, token, realm, roleName string, roles []Role) error
+ GetCompositeRealmRoles(ctx context.Context, token, realm, roleName string) ([]*Role, error)
  GetCompositeRealmRolesByRoleID(ctx context.Context, token, realm, roleID string) ([]*Role, error)
  GetCompositeRealmRolesByUserID(ctx context.Context, token, realm, userID string) ([]*Role, error)
  GetCompositeRealmRolesByGroupID(ctx context.Context, token, realm, groupID string) ([]*Role, error)
@@ -292,6 +295,7 @@ type GoCloak interface {
  AddClientRoleToUser(ctx context.Context, token, realm, clientID, userID string, roles []Role) error
  AddClientRoleToGroup(ctx context.Context, token, realm, clientID, groupID string, roles []Role) error
  DeleteClientRoleFromGroup(ctx context.Context, token, realm, clientID, groupID string, roles []Role) error
+ GetClientRoles(ctx context.Context, accessToken, realm, clientID string, params GetRolesParams)
  GetCompositeClientRolesByRoleID(ctx context.Context, token, realm, clientID, roleID string) ([]*Role, error)
  GetClientRolesByUserID(ctx context.Context, token, realm, clientID, userID string) ([]*Role, error)
  GetClientRolesByGroupID(ctx context.Context, token, realm, clientID, groupID string) ([]*Role, error)
@@ -341,11 +345,11 @@ type GoCloak interface {
  UpdatePolicy(ctx context.Context, token, realm, clientID string, policy PolicyRepresentation) error
  DeletePolicy(ctx context.Context, token, realm, clientID, policyID string) error
 
- GetResourcePolicy(ctx context.Context, token, realm, permissionID string) (*ResourcePolicyRepresentation, error) 
- GetResourcePolicies(ctx context.Context, token, realm string, params GetResourcePoliciesParams) ([]*ResourcePolicyRepresentation, error) 
- CreateResourcePolicy(ctx context.Context, token, realm, resourceID string, policy ResourcePolicyRepresentation) (*ResourcePolicyRepresentation, error) 
- UpdateResourcePolicy(ctx context.Context, token, realm, permissionID string, policy ResourcePolicyRepresentation) error 
- DeleteResourcePolicy(ctx context.Context, token, realm, permissionID string) error 
+ GetResourcePolicy(ctx context.Context, token, realm, permissionID string) (*ResourcePolicyRepresentation, error)
+ GetResourcePolicies(ctx context.Context, token, realm string, params GetResourcePoliciesParams) ([]*ResourcePolicyRepresentation, error)
+ CreateResourcePolicy(ctx context.Context, token, realm, resourceID string, policy ResourcePolicyRepresentation) (*ResourcePolicyRepresentation, error)
+ UpdateResourcePolicy(ctx context.Context, token, realm, permissionID string, policy ResourcePolicyRepresentation) error
+ DeleteResourcePolicy(ctx context.Context, token, realm, permissionID string) error
 
  GetPermission(ctx context.Context, token, realm, clientID, permissionID string) (*PermissionRepresentation, error)
  GetPermissions(ctx context.Context, token, realm, clientID string, params GetPermissionParams) ([]*PermissionRepresentation, error)
@@ -380,7 +384,8 @@ type GoCloak interface {
  GetIdentityProviders(ctx context.Context, token, realm string) ([]*IdentityProviderRepresentation, error)
  UpdateIdentityProvider(ctx context.Context, token, realm, alias string, providerRep IdentityProviderRepresentation) error
  DeleteIdentityProvider(ctx context.Context, token, realm, alias string) error
-
+ CreateIdentityProviderMapper(ctx context.Context, token, realm, alias string, mapper IdentityProviderMapper) (string, error)
+ GetIdentityProviderMapper(ctx context.Context, token string, realm string, alias string, mapperID string) (*IdentityProviderMapper, error)
  CreateUserFederatedIdentity(ctx context.Context, token, realm, userID, providerID string, federatedIdentityRep FederatedIdentityRepresentation) error
  GetUserFederatedIdentities(ctx context.Context, token, realm, userID string) ([]*FederatedIdentityRepresentation, error)
  DeleteUserFederatedIdentity(ctx context.Context, token, realm, userID, providerID string) error

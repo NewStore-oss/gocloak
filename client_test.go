@@ -25,7 +25,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/pkcs12"
 
-	"github.com/Nerzal/gocloak/v8"
+	"github.com/newstore-oss/gocloak/v9"
 )
 
 type configAdmin struct {
@@ -1609,6 +1609,7 @@ func TestGocloak_ClientScopeMappingsClientRoles(t *testing.T) {
 		token.AccessToken,
 		cfg.GoCloak.Realm,
 		gocloakClientID,
+		gocloak.GetRolesParams{},
 	)
 	require.NoError(t, err, "GetClientRoles failed")
 
@@ -1684,6 +1685,7 @@ func TestGocloak_ClientScopeMappingsRealmRoles(t *testing.T) {
 		context.Background(),
 		token.AccessToken,
 		cfg.GoCloak.Realm,
+		gocloak.GetRolesParams{},
 	)
 	require.NoError(t, err, "GetRealmRoles failed")
 
@@ -1990,7 +1992,8 @@ func TestGocloak_GetClientRoles(t *testing.T) {
 		context.Background(),
 		token.AccessToken,
 		cfg.GoCloak.Realm,
-		*testClient.ID)
+		*testClient.ID,
+		gocloak.GetRolesParams{})
 	require.NoError(t, err, "GetClientRoles failed")
 }
 
@@ -2281,7 +2284,9 @@ func TestGocloak_GetRealmRoles(t *testing.T) {
 	roles, err := client.GetRealmRoles(
 		context.Background(),
 		token.AccessToken,
-		cfg.GoCloak.Realm)
+		cfg.GoCloak.Realm,
+		gocloak.GetRolesParams{},
+	)
 	require.NoError(t, err, "GetRealmRoles failed")
 	t.Logf("Roles: %+v", roles)
 }
@@ -3213,7 +3218,8 @@ func TestGoCloak_ClientSecret(t *testing.T) {
 	defer tearDown()
 	require.Equal(t, *testClient.ID, clientID)
 
-	oldCreds, err := client.GetClientSecret(
+	// Keycloak does not support setting the secret while creating the client
+	_, err := client.GetClientSecret(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoCloak.Realm,
@@ -3228,7 +3234,8 @@ func TestGoCloak_ClientSecret(t *testing.T) {
 		clientID,
 	)
 	require.NoError(t, err, "RegenerateClientSecret failed")
-	require.NotEqual(t, *oldCreds.Value, *regeneratedCreds.Value)
+	require.NotNil(t, regeneratedCreds.Value, "RegenerateClientSecret value is nil")
+	require.NotEmpty(t, *regeneratedCreds.Value, "RegenerateClientSecret value is empty")
 
 	err = client.DeleteClient(
 		context.Background(),
@@ -3903,23 +3910,26 @@ func TestGocloak_CreateGetDeleteUserFederatedIdentity(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, idp, res)
 
-	err = client.CreateIdentityProviderMapper(
+	mapper := gocloak.IdentityProviderMapper{
+		Name:                   gocloak.StringP("add-google-origin-attribute"),
+		IdentityProviderMapper: gocloak.StringP("hardcoded-attribute-idp-mapper"),
+		IdentityProviderAlias:  gocloak.StringP("google"),
+		Config: &map[string]string{
+			"syncMode":        "INHERIT",
+			"attribute":       "origin",
+			"attribute.value": "google",
+		},
+	}
+
+	mapperresID, err := client.CreateIdentityProviderMapper(
 		context.Background(),
 		token.AccessToken,
 		cfg.GoCloak.Realm,
 		"google",
-		gocloak.IdentityProviderMapper{
-			Name:                   gocloak.StringP("add-google-origin-attribute"),
-			IdentityProviderMapper: gocloak.StringP("hardcoded-attribute-idp-mapper"),
-			IdentityProviderAlias:  gocloak.StringP("google"),
-			Config: &map[string]string{
-				"syncMode":        "INHERIT",
-				"attribute":       "origin",
-				"attribute.value": "google",
-			},
-		},
+		mapper,
 	)
 	require.NoError(t, err)
+	require.NotEmpty(t, mapper, mapperresID)
 
 	mappers, err := client.GetIdentityProviderMappers(
 		context.Background(),
@@ -3929,6 +3939,8 @@ func TestGocloak_CreateGetDeleteUserFederatedIdentity(t *testing.T) {
 	)
 	require.Len(t, mappers, 1)
 	mapperID := mappers[0].ID
+
+	require.Equal(t, mapperresID, gocloak.PString(mapperID))
 
 	defer func() {
 		err = client.DeleteIdentityProviderMapper(
@@ -4740,6 +4752,7 @@ func TestGocloak_RolePolicy(t *testing.T) {
 		context.Background(),
 		token.AccessToken,
 		cfg.GoCloak.Realm,
+		gocloak.GetRolesParams{},
 	)
 	require.NoError(t, err, "GetRealmRoles failed")
 	require.GreaterOrEqual(t, len(roles), 1, "GetRealmRoles failed")
